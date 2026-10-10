@@ -1,0 +1,54 @@
+[package]
+name = "metroflow"
+version = "0.16.0"
+edition = "2021"
+authors = ["German Vitiaz <@daurge>"]
+description = "MetroFlow — минималистичный симулятор и конструктор системы метрополитена"
+license = "PolyForm-Noncommercial-1.0.0"
+repository = "https://github.com/daurge-fff/metroflow"
+readme = "README.md"
+
+[dependencies]
+macroquad = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+directories = "5"
+
+[target.'cfg(target_os = "android")'.dependencies]
+miniquad = "0.4"
+ndk-sys = "0.2"
+libc = "0.2"
+
+# Метаданные для сборки APK (cargo-quad-apk / cargo-apk). По умолчанию
+# игнорируются, если Android-сборка не используется.
+[package.metadata.android]
+# Последний сегмент должен совпадать с именем крейта (metroflow) — иначе
+# cargo-apk ищет lib<последний_сегмент>.so.
+package_name = "com.metroflow.metroflow"
+label = "MetroFlow"
+assets = "assets"
+res = "android/res"
+icon = "@mipmap/ic_launcher"
+android_version = 34
+target_sdk_version = 34
+min_sdk_version = 24
+build_targets = ["aarch64-linux-android"]
+# Полноэкранный (immersive) режим без панелей статуса/навигации.
+fullscreen = true
+
+# Android 12+ требует явный android:exported у активности с intent-filter.
+# Ориентация — всегда альбомная (ландшафт), иначе на телефоне всё мелко.
+[package.metadata.android.activity_attributes]
+"android:exported" = "true"
+"android:screenOrientation" = "landscape"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

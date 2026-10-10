@@ -1,0 +1,24 @@
+# Build output
+/target
+/dist
+
+# OS / editor cruft
+.DS_Store
+.idea/
+.vscode/
+*.tmp
+*.swp
+*.log
+
+# Runtime save data (written to the OS data dir, but just in case)
+/saves
+
+# Local tooling (agent/MCP config) — keep out of the published repo
+/opencode.json
+/AGENTS.md
+
+# Ignore stray images, but keep the actual app resources
+*.png
+!/icon/*.png
+!/android/res/**/*.png
+!/docs/**/*.png

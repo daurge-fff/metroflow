@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#14203a"/>
+      <stop offset="1" stop-color="#0b1120"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#4fc3f7" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#4fc3f7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="196" fill="url(#glow)"/>
+
+  <!-- track casing -->
+  <g stroke="#070b15" stroke-width="40" stroke-linecap="round" fill="none" opacity="0.9">
+    <path d="M256 256 L106 163"/>
+    <path d="M256 256 L413 196"/>
+    <path d="M256 256 L274 413"/>
+    <path d="M256 256 L113 338"/>
+  </g>
+
+  <!-- colored lines -->
+  <g stroke-width="24" stroke-linecap="round" fill="none">
+    <path d="M256 256 L106 163" stroke="#e5534b"/>
+    <path d="M256 256 L413 196" stroke="#4fa3e3"/>
+    <path d="M256 256 L274 413" stroke="#56c596"/>
+    <path d="M256 256 L113 338" stroke="#f2b134"/>
+  </g>
+
+  <!-- intermediate stations -->
+  <g fill="#eef3fb" stroke="#0b1120" stroke-width="9">
+    <circle cx="186" cy="211" r="15"/>
+    <circle cx="334" cy="226" r="15"/>
+    <circle cx="265" cy="334" r="15"/>
+    <circle cx="185" cy="297" r="15"/>
+  </g>
+
+  <!-- termini -->
+  <g fill="#eef3fb" stroke="#0b1120" stroke-width="11">
+    <circle cx="106" cy="163" r="21"/>
+    <circle cx="413" cy="196" r="21"/>
+    <circle cx="274" cy="413" r="21"/>
+    <circle cx="113" cy="338" r="21"/>
+  </g>
+
+  <!-- central hub -->
+  <circle cx="256" cy="256" r="52" fill="#eef3fb" stroke="#0b1120" stroke-width="14"/>
+  <circle cx="256" cy="256" r="22" fill="#4fc3f7"/>
+</svg>

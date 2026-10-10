@@ -1,0 +1,24 @@
+stroke-linecap round
+stroke-linejoin round
+fill none
+stroke '#070b15'
+stroke-width 78
+polyline 119,393 119,119 256,275 393,119 393,393
+stroke '#4fc3f7'
+stroke-width 52
+polyline 119,393 119,119 256,275 393,119 393,393
+fill '#eef3fb'
+stroke '#0b1120'
+stroke-width 10
+circle 119,119 119,89
+circle 256,275 256,245
+circle 393,119 393,89
+fill '#4fc3f7'
+stroke none
+circle 256,275 256,262
+fill '#f2b134'
+roundrectangle 352,300 430,344 12,12
+fill '#0a1020'
+stroke none
+roundrectangle 364,312 384,332 4,4
+roundrectangle 396,312 416,332 4,4

@@ -3,7 +3,8 @@ name: Release (desktop, cloud build)
 # Optional: build desktop binaries in the cloud and attach them to a release.
 # The recommended way to cut a release is `scripts/package_releases.sh` +
 # `gh release create` (that also produces the macOS .dmg and the Android APK).
-# This workflow is manual so it never duplicates assets automatically.
+# This workflow is manual so it never runs on its own; asset names include the
+# version, matching the local script, so re-running cannot create duplicates.
 on:
   workflow_dispatch:
     inputs:
@@ -37,6 +38,13 @@ jobs:
         with:
           targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
+      - name: Resolve version
+        id: ver
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag }}
+        run: echo "v=${TAG#v}" >> "$GITHUB_OUTPUT"
+
       - name: Linux deps
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -45,20 +53,23 @@ jobs:
 
       - name: Build (Linux)
         if: matrix.os == 'ubuntu-latest'
+        shell: bash
         run: |
           cargo build --release
           mkdir -p out
-          cp target/release/metroflow out/MetroFlow-linux-x86_64
+          cp target/release/metroflow "out/MetroFlow-${{ steps.ver.outputs.v }}-linux-x86_64"
 
       - name: Build (Windows)
         if: matrix.os == 'windows-latest'
+        shell: bash
         run: |
           cargo build --release
-          mkdir out
-          copy target\release\metroflow.exe out\MetroFlow-windows-x86_64.exe
+          mkdir -p out
+          cp target/release/metroflow.exe "out/MetroFlow-${{ steps.ver.outputs.v }}-windows-x86_64.exe"
 
       - name: Build (macOS universal)
         if: matrix.os == 'macos-latest'
+        shell: bash
         run: |
           cargo build --release --target aarch64-apple-darwin
           cargo build --release --target x86_64-apple-darwin
@@ -66,8 +77,8 @@ jobs:
           lipo -create \
             target/aarch64-apple-darwin/release/metroflow \
             target/x86_64-apple-darwin/release/metroflow \
-            -output out/MetroFlow-macos-universal
-          chmod +x out/MetroFlow-macos-universal
+            -output "out/MetroFlow-${{ steps.ver.outputs.v }}-macos-universal"
+          chmod +x "out/MetroFlow-${{ steps.ver.outputs.v }}-macos-universal"
 
       - uses: actions/upload-artifact@v4
         with:

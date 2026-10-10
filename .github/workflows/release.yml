@@ -1,9 +1,15 @@
-name: Release
+name: Release (desktop, cloud build)
 
+# Optional: build desktop binaries in the cloud and attach them to a release.
+# The recommended way to cut a release is `scripts/package_releases.sh` +
+# `gh release create` (that also produces the macOS .dmg and the Android APK).
+# This workflow is manual so it never duplicates assets automatically.
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to attach builds to (e.g. v0.16.0)"
+        required: true
 
 permissions:
   contents: write
@@ -24,6 +30,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -67,8 +75,8 @@ jobs:
           path: out/*
           if-no-files-found: error
 
-  release:
-    name: publish
+  attach:
+    name: attach to release
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -76,9 +84,8 @@ jobs:
         with:
           path: dist
           merge-multiple: true
-      - name: List
-        run: ls -lh dist
+      - run: ls -lh dist
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag }}
           files: dist/*
-          generate_release_notes: true

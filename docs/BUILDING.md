@@ -10,35 +10,26 @@
 ## macOS
 
 ```sh
-rustup target add aarch64-apple-darwin      # Apple Silicon (или x86_64-apple-darwin)
-cargo build --release
+rustup target add aarch64-apple-darwin x86_64-apple-darwin
+cargo build --release            # host (Apple Silicon по умолчанию)
 ```
 
-Готовый бинарник: `target/release/metroflow` (запускается двойным кликом из
-терминала: `./target/release/metroflow`).
+Готовый бинарник: `target/release/metroflow`.
 
-Чтобы сделать `.app`-бандл (перетаскивается в «Программы»/отправляется друзьям):
+**`.app` (universal, arm64 + Intel) и `.dmg`** собираются скриптом
+`scripts/package_releases.sh` — он делает `lipo` (обе архитектуры в одном
+файле), иконку `.icns` (`sips` + `iconutil`), `Info.plist`, ad-hoc подпись
+(`codesign -s -`) и `.dmg` (`hdiutil`) с ярлыком-ссылкой на «Программы». Тот же
+скрипт собирает Windows и Android:
 
 ```sh
-APP=MetroFlow.app
-mkdir -p "$APP/Contents/MacOS"
-cp target/release/metroflow "$APP/Contents/MacOS/MetroFlow"
-cat > "$APP/Contents/Info.plist" <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>CFBundleName</key><string>MetroFlow</string>
-  <key>CFBundleExecutable</key><string>MetroFlow</string>
-  <key>CFBundleIdentifier</key><string>com.metroflow.game</string>
-  <key>CFBundleVersion</key><string>1.0</string>
-  <key>CFBundlePackageType</key><string>APPL</string>
-</dict></plist>
-PLIST
+bash scripts/package_releases.sh
+# dist/MetroFlow-<ver>-macos.dmg (+ .zip), -windows-x86_64.exe, -android.apk
 ```
 
-Для распространения без предупреждений Gatekeeper нужна подпись/нотаризация
-(Apple Developer ID) — иначе друзьям придётся открывать через
-«ПКМ → Открыть». Это отдельный шаг.
+Без нотаризации Apple при первом запуске возможно предупреждение Gatekeeper
+(обойти: «ПКМ → Открыть» либо `xattr -dr com.apple.quarantine MetroFlow.app`).
+Чтобы убрать его совсем, нужен Apple Developer ID и `notarytool` — отдельный шаг.
 
 ---
 
@@ -57,7 +48,7 @@ cargo build --release
 самодостаточный (может понадобиться установленный
 [Microsoft Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)).
 
-### Вариант B — кросс-сборка из macOS/Linux (экспериментально)
+### Вариант B — кросс-сборка из macOS/Linux
 
 ```sh
 rustup target add x86_64-pc-windows-gnu
@@ -65,9 +56,10 @@ brew install mingw-w64                       # macOS
 cargo build --release --target x86_64-pc-windows-gnu
 ```
 
-Файл: `target/x86_64-pc-windows-gnu/release/metroflow.exe`.
-С сборкой графики (miniquad) кросс-компиляция иногда капризна — если не соберётся,
-используйте вариант A или CI на windows-раннере.
+Файл: `target/x86_64-pc-windows-gnu/release/metroflow.exe`. Линкер уже прописан
+в `.cargo/config.toml` (`x86_64-w64-mingw32-gcc`), так что ничего
+донастраивать не нужно. Бинарь GUI (`windows_subsystem = "windows"`) — окно
+консоли не открывается.
 
 ---
 
@@ -82,7 +74,12 @@ cargo build --release
 ```
 
 Файл: `target/release/metroflow`. На другой машине нужны те же системные
-библиотеки (или собрать AppImage/`.deb`).
+библиотеки.
+
+Кросс-сборка под Linux из macOS: `scripts/package_releases.sh` собирает
+x86_64-бинарник в контейнере `rust:1-bookworm` через Docker
+(`--platform linux/amd64`). Либо тот же артефакт собирает CI (`.github/workflows/release.yml`)
+при пуше тега `v*`.
 
 ---
 
@@ -153,10 +150,27 @@ cargo quad-apk logcat
 
 ---
 
+## Релиз для GitHub
+
+Скрипт `scripts/package_releases.sh` собирает все артефакты в `dist/` и печатает
+готовую команду:
+
+```sh
+git add -A && git commit -m "Release v0.16.0"
+git tag v0.16.0 && git push origin main --tags
+gh release create v0.16.0 dist/MetroFlow-0.16.0-* \
+   --title "MetroFlow 0.16.0" --notes-file CHANGELOG.md
+```
+
+Или через сайт: **Releases → Draft a new release** → тег → перетащить файлы из
+`dist/` в **Attach binaries** → Publish.
+
 ## Общие замечания
 
-- Проверки перед сборкой: `cargo fmt --check`, `cargo clippy --all-targets`,
+- Проверки перед сборкой (и в CI): `cargo fmt --check`, `cargo clippy --all-targets`,
   `cargo test`.
 - Релиз оптимизирован (см. `[profile.release]` в `Cargo.toml`: `lto`, `opt-level=3`).
-- Файл `opencode.json` и `AGENTS.md` — служебные (для разработки), в
-  дистрибутив не нужны.
+- Иконки лежат в `icon/` (исходники `.svg`/`.mvg`/`.png`) и `android/res/mipmap-*`
+  (готовые плотности для APK) — это исходники, их нужно коммитить.
+- Служебные файлы `opencode.json` и `AGENTS.md` — в `.gitignore` (в публичный
+  репозиторий не попадают).

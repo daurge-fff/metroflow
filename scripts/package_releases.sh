@@ -75,6 +75,20 @@ cp target/x86_64-pc-windows-gnu/release/metroflow.exe \
    "dist/MetroFlow-${VERSION}-windows-x86_64.exe"
 echo "Windows -> dist/MetroFlow-${VERSION}-windows-x86_64.exe"
 
+# ── Linux (x86_64): native on Linux, else via Docker, else CI ────
+LINUX_OUT="dist/MetroFlow-${VERSION}-linux-x86_64"
+if [ "$(uname -s)" = "Linux" ]; then
+    cargo build --release
+    cp target/release/metroflow "$LINUX_OUT" && chmod +x "$LINUX_OUT"
+    echo "Linux   -> $LINUX_OUT"
+elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+    docker run --rm --platform linux/amd64 -v "$PWD":/work -w /work rust:1-bookworm \
+      bash -lc "apt-get update -qq && apt-get install -y -qq libx11-dev libxi-dev libgl1-mesa-dev libasound2-dev pkg-config >/dev/null && cargo build --release --target x86_64-unknown-linux-gnu && cp target/x86_64-unknown-linux-gnu/release/metroflow /work/$LINUX_OUT && chmod +x /work/$LINUX_OUT"
+    echo "Linux   -> $LINUX_OUT (via Docker)"
+else
+    echo "Linux   -> skip (no Linux host / Docker); CI release workflow builds it"
+fi
+
 # ── Android (APK) ───────────────────────────────────────────────
 bash scripts/build_android.sh
 cp target/android-artifacts/release/apk/metroflow.apk \

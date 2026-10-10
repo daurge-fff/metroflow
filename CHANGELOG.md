@@ -14,6 +14,10 @@
 
 ### Добавлено
 
+- **Сборки под все платформы**: macOS **universal** (arm64 + Intel, `.dmg`/`.app`),
+  Windows (`.exe`, GUI без консоли), **Linux** (x86_64) и Android (`.apk`).
+  Скрипт `scripts/package_releases.sh` собирает всё в `dist/`; workflow
+  `.github/workflows/release.yml` по тегу `v*` публикует Linux/Windows/macOS.
 - **Новый логотип-«M»** и обновлённая иконка приложения.
 - **Анимированная стартовая сцена**: две линии с узловой пересадкой и три
   поезда (поворачивающийся вагон на диагонали).
